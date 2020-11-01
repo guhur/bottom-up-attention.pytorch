@@ -4,7 +4,6 @@ import numpy as np
 import torch
 
 from detectron2.structures import Instances
-from models.bua.layers.nms import nms
 
 def save_features(output_file, features, boxes=None):
     if boxes is None:
@@ -39,6 +38,8 @@ def extractor_postprocess(boxes, scores, features_pooled, input_per_image, extra
     Returns:
         Instances: the resized output from the model, based on the output resolution
     """
+    from models.bua import _C
+    nms = amp.float_function(_C.nms)
     MIN_BOXES = extractor.MIN_BOXES
     MAX_BOXES = extractor.MAX_BOXES
     CONF_THRESH = extractor.CONF_THRESH

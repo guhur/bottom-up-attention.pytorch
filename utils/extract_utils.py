@@ -3,7 +3,6 @@ import numpy as np
 import cv2
 import os
 
-from models.bua.layers.nms import nms
 from models.bua.box_regression import BUABoxes
 
 PIXEL_MEANS = np.array([[[102.9801, 115.9465, 122.7717]]])
@@ -58,6 +57,8 @@ def get_image_blob(im, pixel_means):
 
 
 def save_roi_features(args, cfg, im_file, im, dataset_dict, boxes, scores, features_pooled, attr_scores=None):
+    from models.bua import _C
+    nms = amp.float_function(_C.nms)
     MIN_BOXES = cfg.MODEL.BUA.EXTRACTOR.MIN_BOXES
     MAX_BOXES = cfg.MODEL.BUA.EXTRACTOR.MAX_BOXES
     CONF_THRESH = cfg.MODEL.BUA.EXTRACTOR.CONF_THRESH
@@ -111,6 +112,8 @@ def save_roi_features(args, cfg, im_file, im, dataset_dict, boxes, scores, featu
     np.savez_compressed(output_file, x=image_feat, bbox=image_bboxes, num_bbox=len(keep_boxes), image_h=np.size(im, 0), image_w=np.size(im, 1), info=info)
 
 def save_bbox(args, cfg, im_file, im, dataset_dict, boxes, scores):
+    from models.bua import _C
+    nms = amp.float_function(_C.nms)
     MIN_BOXES = cfg.MODEL.BUA.EXTRACTOR.MIN_BOXES
     MAX_BOXES = cfg.MODEL.BUA.EXTRACTOR.MAX_BOXES
     CONF_THRESH = cfg.MODEL.BUA.EXTRACTOR.CONF_THRESH

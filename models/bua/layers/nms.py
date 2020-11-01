@@ -1,12 +1,9 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 # from ._utils import _C
-from models.bua import _C
 
-from apex import amp
 import torch
 
 # Only valid with fp32 inputs - give AMP the hint
-nms = amp.float_function(_C.nms)
 
 # nms.__doc__ = """
 # This function performs Non-maximum suppresion"""
@@ -17,6 +14,9 @@ def batched_nms(boxes, scores, idxs, iou_threshold):
     """
     Same as torchvision.ops.boxes.batched_nms, but safer.
     """
+    from apex import amp
+    from models.bua import _C
+    nms = amp.float_function(_C.nms)
     assert boxes.shape[-1] == 4
     boxes = boxes.cpu()
     scores = scores.cpu()
@@ -63,6 +63,8 @@ def box_ops_batched_nms(boxes, scores, idxs, iou_threshold):
         the elements that have been kept by NMS, sorted
         in decreasing order of scores
     """
+    from models.bua import _C
+    nms = amp.float_function(_C.nms)
     if boxes.numel() == 0:
         return torch.empty((0,), dtype=torch.int64, device=boxes.device)
     # strategy: in order to perform NMS independently per class.
